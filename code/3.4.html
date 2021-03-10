@@ -1,0 +1,161 @@
+<html>
+
+<head>
+    <title>11060</title>
+
+    <style>
+        .item {
+            width: 30%;
+            float: left;
+            margin: 1%;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+        // API to HTML 
+        // Accessing an API by location
+
+        // need NMA API key
+        // https://www.nma.gov.au/about/our-collection/our-apis
+        // docs: https://github.com/NationalMuseumAustralia/Collection-API/wiki/Getting-started
+
+        $(document).ready(function () {
+
+            //create variable for new location information
+            var newLocation = '';
+
+            //now get browser geo location
+            if (navigator.geolocation) {
+
+                //log the data returned through the browser geolocation api
+                console.log(navigator.geolocation)
+
+                //if able to retrieve current location
+                function success(pos) {
+                    var crd = pos.coords;
+                    console.log(pos);
+
+                    console.log('Your current position is:');
+                    console.log('Latitude : ' + crd.latitude);
+                    console.log('Longitude: ' + crd.longitude);
+                    console.log('More or less ' + crd.accuracy + ' meters.');
+
+                    //go get the location name, using the latitude and longitude
+                    getLocationName(crd.latitude, crd.longitude);
+
+                };
+
+                //if there is an error returning the geolocation then you should identify it and resolve it
+                function error(err) {
+                    console.warn('ERROR(' + err.code + '): ' + err.message);
+                };
+
+                //this is the line that actually prompts the user for their location
+                navigator.geolocation.getCurrentPosition(success, error);
+
+            } else {
+                //if the browser doesn't support geolocation then you need to do some testing
+                ShowError();
+            };
+
+        });
+
+        // Function to load the location name, based off the lat / long 
+        function getLocationName(lat, long) {
+            // my OpenCage Geocoder API key
+            var geoApi = '33e3b3aefbaa415fa6393bcb1a1831e5';
+
+            //opencage url from here: https://opencagedata.com/api
+            var geocodeUrl = 'http://api.opencagedata.com/geocode/v1/json?q=' + lat + '+' + long + '&key=' + geoApi;
+
+            // go get the json using the query above
+            $.getJSON(geocodeUrl, function (locationData) {
+                console.log(locationData);
+                // get the location string - only suburb
+                var locationString = locationData.results[0].components.suburb;
+
+                //now call our getNmaData function that we created at step 1
+                getNmaData(locationString);
+            });
+        }
+
+        // Function to actually load the API data
+        function getNmaData(q) {
+
+            // my api key
+            var key = '4SDwv6pd4DyiBrJ5xu2PnVUmaLhIogIk';
+
+            var objectid = '14693';
+
+            // API call
+            var objectApi = 'https://data.nma.gov.au/object/' + objectid + '&apikey=' + key;
+
+            var searchQuery = q;
+
+            // var searchQuery = 'canberra';
+            var searchUrl = 'https://data.nma.gov.au/object?text=' + searchQuery;
+
+            $.getJSON(searchUrl, function (apiData) {
+                console.log('in search query');
+                console.log(apiData);
+
+                // let's loop through the data 
+                // we need to know how many items are in the array in order to loop through it
+                // luckily it is easy to find by using the length 
+                // remember, apiData is what we've called the data returned from the API
+                // apiData.data is the actual data array returned by the API call
+                // so to get the length we say apiData.data.length
+                for (i = 0; i < apiData.data.length; i++) {
+                    //variable to hold single record 
+                    var r = apiData.data[i]
+                    // let's output the title to the console so we know it works. 
+                    console.log(r.title);
+
+                    // now let's show the data on the page
+                    // create an item 
+                    var item = $('<div class="item">');
+
+                    //append the data as html tags to the item
+                    // show title
+                    item.append('<h3>' + r.title + '</h3>');
+
+                    // show physical description
+                    item.append('<p>' + r.physicalDescription + '</p>');
+
+                    // show work type
+                    // check to see if the array exists before trying to set work type
+                    if (r.additionalType != undefined) {
+                        var workType = r.additionalType[0];
+                    };
+
+                    // show date
+                    // check to see if the array exists before trying to set date
+                    if (r.temporal != undefined) {
+                        var workDate = r.temporal[0].title;
+                    };
+
+                    // add them as a single line to the item
+                    item.append('<p>' + workType + ' &middot; ' + workDate + '</p>');
+
+                    //now append the item itself to the html page
+                    $('.item-container').append(item);
+                }
+
+            });
+        }
+
+    </script>
+
+    <div class="item-container">
+
+    </div>
+
+</body>
+
+</html>

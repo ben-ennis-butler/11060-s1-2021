@@ -1,0 +1,86 @@
+<html>
+
+<head>
+    <title>11060</title>
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            // need NMA API key
+            // https://www.nma.gov.au/about/our-collection/our-apis
+            // docs: https://github.com/NationalMuseumAustralia/Collection-API/wiki/Getting-started
+
+            // my api key
+            var key = '4SDwv6pd4DyiBrJ5xu2PnVUmaLhIogIk';
+
+            var objectid = '14693';
+
+            // api call
+            var url = 'https://data.nma.gov.au/object/' + objectid + '&apikey=' + key;
+
+            $.getJSON(url, function (apiData) {
+                console.log('im here');
+                console.log(apiData);
+
+                var item = apiData.data[0];
+
+                var collectionid = item.collection.id;
+
+                //old - slow way
+                //create a variable for the title, make it a h2 and add the text
+                var title = $('<h2>').html('Title: ' + apiData.data[0].title);
+                $('body').append(title);
+
+                //fast way
+                $('.physdesc').html(item.physicalDescription);
+
+
+
+                // var imageurl = 'https://data.nma.gov.au/media/' + item.hasVersion[1].id + '&apikey=' + key;
+
+                // console.log(imageurl);
+
+                // $.getJSON(imageurl, function (i) {
+                //     console.log('in image');
+
+                //     var img = i.data[0].hasVersion[1].identifier;
+
+                //     console.log(i);
+
+                //     // console.log(img);
+                //     $('.image').append('<img src="' + img + '">');
+
+                // })
+
+
+
+                // var collectionurl = 'https://data.nma.gov.au/collection/' + collectionid + '&apikey=' + key;
+                // $.getJSON(collectionurl, function (d) {
+                //     console.log('in  collection');
+                //     console.log(d);
+                // })
+
+            });
+        });
+
+    </script>
+
+
+    <h2>Physical description</h2>
+    <p class="physdesc"></p>
+
+    <div class="image">
+
+    </div>
+
+
+
+</body>
+
+</html>

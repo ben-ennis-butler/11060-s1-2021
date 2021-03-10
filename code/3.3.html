@@ -1,0 +1,125 @@
+<html>
+
+<head>
+    <title>11060</title>
+
+    <style>
+        .item {
+            width: 30%;
+            float: left;
+            margin: 1%;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            // API to HTML 2
+            // Accessing an API and looping through returned data
+
+            // need NMA API key
+            // https://www.nma.gov.au/about/our-collection/our-apis
+            // docs: https://github.com/NationalMuseumAustralia/Collection-API/wiki/Getting-started
+
+            // my api key
+            var key = '4SDwv6pd4DyiBrJ5xu2PnVUmaLhIogIk';
+
+            var objectid = '14693';
+
+            // API call
+            var url = 'https://data.nma.gov.au/object/' + objectid + '&apikey=' + key;
+
+            var searchQuery = 'canberra';
+            var searchUrl = 'https://data.nma.gov.au/object?title=' + searchQuery;
+
+            $.getJSON(searchUrl, function (apiData) {
+                console.log('in search query');
+                console.log(apiData);
+
+                // let's loop through the data 
+                // we need to know how many items are in the array in order to loop through it
+                // luckily it is easy to find by using the length 
+                // remember, apiData is what we've called the data returned from the API
+                // apiData.data is the actual data array returned by the API call
+                // so to get the length we say apiData.data.length
+                for (i = 0; i < apiData.data.length; i++) {
+                    //variable to hold single record 
+                    var r = apiData.data[i]
+                    // let's output the title to the console so we know it works. 
+                    // console.log(r.hasVersion);
+
+                    // now let's show the data on the page
+                    // create an item 
+                    var item = $('<div class="item">');
+
+                    //append the data as html tags to the item
+                    // show title
+                    item.append('<h3>' + r.title + '</h3>');
+
+                    // show physical description
+                    item.append('<p>' + r.physicalDescription + '</p>');
+
+                    // show work type
+                    // check to see if the array exists before trying to set work type
+                    if (r.additionalType != undefined) {
+                        var workType = r.additionalType[0];
+                    };
+
+                    // show date
+                    // check to see if the array exists before trying to set date
+                    if (r.temporal != undefined) {
+                        var workDate = r.temporal[0].title;
+                    };
+
+                    // add them as a single line to the item
+                    item.append('<p>' + workType + ' &middot; ' + workDate + '</p>');
+
+                    // Check if there is an image
+                    if (r.hasVersion != undefined) {
+                        console.log('IMAGE');
+
+                        //grab the media ID 
+                        var mediaID = r.hasVersion[0].id;
+
+                        // add the ID into the media API 
+                        var mediaUrl = 'https://data.nma.gov.au/media/' + mediaID;
+
+                        // new JSON call, which will only execute if there is an image
+                        $.getJSON(mediaUrl, function (imgData) {
+                            console.log(imgData);
+
+                            var imageUrl = imgData.data[0].hasVersion[0].identifier;
+
+                            //item.append('<img src="' + imageUrl + '" alt="' + r.title + '">');
+
+
+                        });
+
+
+                    }
+
+
+
+
+                    //now append the item itself to the html page
+                    $('.item-container').append(item);
+                }
+
+            });
+        });
+
+    </script>
+
+    <div class="item-container">
+
+    </div>
+
+</body>
+
+</html>
